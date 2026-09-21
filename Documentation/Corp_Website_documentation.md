@@ -1,715 +1,1044 @@
 # Corp Website (Romance & Co) — TryHackMe Technical Walkthrough
 
-> **Professional CTF Documentation | Web Security | Linux Privilege Escalation**
+<p align="center">
+  <img src="../Assets/banner.png" alt="Corp Website TryHackMe Banner" width="100%">
+</p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/TryHackMe-Corp%20Website-red?style=for-the-badge&logo=tryhackme&logoColor=white">
-  <img src="https://img.shields.io/badge/Difficulty-Medium-orange?style=for-the-badge">
-  <img src="https://img.shields.io/badge/Category-Web%20Security-blue?style=for-the-badge">
-  <img src="https://img.shields.io/badge/Platform-Linux-black?style=for-the-badge&logo=linux">
+
+![TryHackMe](https://img.shields.io/badge/TryHackMe-Corp%20Website-red?style=for-the-badge&logo=tryhackme)
+![Difficulty](https://img.shields.io/badge/Difficulty-Medium-orange?style=for-the-badge)
+![Category](https://img.shields.io/badge/Category-Web%20Security-blue?style=for-the-badge)
+![Platform](https://img.shields.io/badge/OS-Linux-black?style=for-the-badge&logo=linux)
+
 </p>
 
 ---
 
-## Document Information
+## Executive Summary
 
-| **Field**            | **Value**                                                                                                |
-| -------------------- | -------------------------------------------------------------------------------------------------------- |
-| **Room**             | Corp Website (Romance & Co)                                                                              |
-| **Platform**         | TryHackMe                                                                                                |
-| **Category**         | Web Security                                                                                             |
-| **Difficulty**       | Medium                                                                                                   |
-| **Operating System** | Linux                                                                                                    |
-| **Assessment Type**  | Capture The Flag (CTF)                                                                                   |
-| **Focus Areas**      | Enumeration, Next.js Fingerprinting, Vulnerability Validation, Reverse Shell, Linux Privilege Escalation |
-| **Status**           | ✅ Completed                                                                                              |
-| **Author**           | Anurag RVNKR                                                                                             |
+The **Corp Website (Romance & Co)** room is a medium-difficulty **TryHackMe** Capture The Flag challenge focused on **web application penetration testing** and **Linux privilege escalation**. The objective is to enumerate a target web application, identify the underlying technology stack, discover an exploitable vulnerability, obtain initial access through **Remote Code Execution (RCE)**, establish an interactive reverse shell, and escalate privileges to obtain root access.
 
----
+Unlike many web challenges, this room demonstrates that traditional directory fuzzing alone is not always sufficient. Success depends on accurately fingerprinting the application's framework, researching framework-specific vulnerabilities, validating findings manually, and performing thorough post-exploitation enumeration.
 
-# Executive Summary
-
-**Corp Website** is a medium-level TryHackMe room that simulates the compromise of a corporate web application built using the **Next.js** framework. The objective is to enumerate the target, identify the underlying technology stack, validate a framework-related vulnerability, obtain initial command execution, establish an interactive shell, and escalate privileges to root.
-
-Unlike many web CTFs that rely on hidden endpoints or directory enumeration, this room requires recognizing the application's framework and shifting toward **technology-specific vulnerability assessment**. After achieving a foothold through a vulnerable web endpoint, local privilege enumeration reveals a passwordless `sudo` configuration that leads to full system compromise.
-
-This document provides a complete technical walkthrough of the assessment while **intentionally redacting all challenge flags** to preserve the educational integrity of the room.
+> **Note:** Challenge flags have been intentionally **redacted** throughout this documentation to preserve the learning experience and comply with TryHackMe community guidelines.
 
 ---
 
 # Table of Contents
 
-1. Introduction
-2. Lab Overview
-3. Attack Path Overview
-4. Phase 1 — Reconnaissance
-5. Phase 2 — Web Enumeration
-6. Phase 3 — Technology Fingerprinting
-7. Phase 4 — Vulnerability Assessment
-8. Phase 5 — Initial Access (Remote Code Execution)
-9. Phase 6 — Reverse Shell
-10. Phase 7 — Privilege Escalation
-11. Phase 8 — Root Access
-12. MITRE ATT&CK Mapping
-13. OWASP Mapping
-14. Defensive Recommendations
-15. Lessons Learned
-16. Conclusion
+- Executive Summary
+- Lab Information
+- Objectives
+- Attack Path Overview
+- Reconnaissance
+- Web Enumeration
+- Technology Fingerprinting
+- Vulnerability Assessment
+- Exploitation
+- Reverse Shell
+- Privilege Escalation
+- Root Access
+- MITRE ATT&CK Mapping
+- OWASP Mapping
+- Defensive Recommendations
+- Lessons Learned
+- Conclusion
 
 ---
 
-# 1. Introduction
+# Lab Information
 
-The **Corp Website** room is designed to demonstrate a realistic web application penetration testing workflow. The target initially appears to be a static corporate website with minimal functionality. Standard enumeration techniques reveal little information, encouraging a deeper inspection of the application's underlying framework.
-
-The assessment demonstrates the importance of:
-
-* Performing structured reconnaissance.
-* Identifying application technologies before exploitation.
-* Validating automated scanner findings manually.
-* Enumerating Linux privileges after gaining shell access.
-* Documenting findings professionally.
-
----
-
-# 2. Lab Overview
-
-| **Objective**           | **Description**                                            |
-| ----------------------- | ---------------------------------------------------------- |
-| Reconnaissance          | Identify exposed services and application entry points.    |
-| Enumeration             | Discover hidden content and technologies.                  |
-| Vulnerability Discovery | Identify publicly known framework vulnerabilities.         |
-| Exploitation            | Achieve Remote Code Execution through the web application. |
-| Post Exploitation       | Obtain an interactive reverse shell.                       |
-| Privilege Escalation    | Exploit insecure sudo configuration.                       |
-| Goal                    | Obtain root privileges and complete the challenge.         |
+| Attribute | Details |
+|-----------|---------|
+| **Platform** | TryHackMe |
+| **Room Name** | Corp Website (Romance & Co) |
+| **Difficulty** | Medium |
+| **Category** | Web Exploitation |
+| **Target Environment** | Linux |
+| **Primary Technology** | Next.js |
+| **Initial Access** | Remote Code Execution |
+| **Privilege Escalation** | Passwordless Sudo Misconfiguration |
+| **Final Objective** | Root Access |
 
 ---
 
-# 3. Attack Path Overview
+# Learning Objectives
 
-```text
-Internet
-      │
-      ▼
-Nmap Service Enumeration
-      │
-      ▼
-Web Application (Port 3000)
-      │
-      ▼
-Next.js Technology Fingerprinting
-      │
-      ▼
-Known Framework Vulnerability Identified
-      │
-      ▼
-Manual Validation with Burp Suite
-      │
-      ▼
-Remote Code Execution
-      │
-      ▼
-Reverse Shell Access
-      │
-      ▼
-Linux Enumeration
-      │
-      ▼
-Passwordless sudo (Python 3)
-      │
-      ▼
-Privilege Escalation
-      │
-      ▼
-Root Access
-```
+During this lab, the following cybersecurity concepts were practiced:
 
-This represents the complete attack lifecycle followed during the room.
+- Network reconnaissance and service enumeration.
+- Directory and subdomain enumeration.
+- Web application fingerprinting.
+- Framework identification.
+- Vulnerability discovery using automated scanners.
+- Manual vulnerability validation using Burp Suite.
+- Remote Code Execution concepts.
+- Reverse shell establishment.
+- Linux privilege enumeration.
+- Passwordless sudo privilege escalation.
+- Professional penetration testing documentation.
 
 ---
 
-# Phase 1 — Reconnaissance
+# Attack Path Overview
+
+The complete attack chain followed during this assessment is illustrated below.
+
+<p align="center">
+  <img src="../Assets/attack-chain.png" width="900">
+</p>
+
+<p align="center"><em>Figure 1 — High-level attack chain followed during the engagement.</em></p>
+
+| Phase | Goal |
+|-------|------|
+| Reconnaissance | Discover exposed services. |
+| Enumeration | Identify application attack surface. |
+| Fingerprinting | Identify technologies powering the application. |
+| Vulnerability Research | Detect known framework vulnerabilities. |
+| Validation | Confirm vulnerability manually. |
+| Exploitation | Achieve Remote Code Execution. |
+| Initial Access | Obtain interactive shell access. |
+| Privilege Escalation | Escalate to root privileges. |
+| Objective Complete | Capture the root flag. |
+
+---
+
+# Reconnaissance
 
 ## Objective
 
-The first objective was to identify all exposed services and understand the attack surface before interacting with the web application.
+The first step of every penetration test is understanding the target environment. Before interacting with the application itself, I performed network reconnaissance to identify exposed services, running technologies, and potential attack surfaces.
 
-## Service Discovery
+The room instructions indicated that the web application was hosted on **port 3000**, so I began by visiting the application in a browser.
 
-A comprehensive TCP scan was performed using **Nmap** with service detection, OS fingerprinting, and default script scanning enabled.
+### Initial Application View
+
+The website appeared to be a simple corporate landing page with static content and no obvious login forms, search fields, or interactive inputs.
+
+<p align="center">
+  <img src="../Screenshots/01_room.png" width="900">
+</p>
+
+<p align="center"><em>Figure 2 — Initial view of the Corp Website application hosted on port 3000.</em></p>
+
+### Initial Observations
+
+- Static corporate-style landing page.
+- Minimal visible functionality.
+- No authentication portal.
+- No user input fields.
+- No immediately obvious attack vectors.
+
+Although the page looked static, appearance alone does not determine the security posture of an application. Enumeration was required to understand what services were actually exposed.
+
+---
+
+## Service Enumeration with Nmap
+
+To gather more information about the target host, I performed a comprehensive **Nmap** scan.
+
+### Scan Command
 
 ```bash
 nmap -sS -sV -A -v <TARGET_IP> -oN nmap.txt
 ```
 
-### Purpose of the Scan
+### Why This Scan?
 
-* Discover open TCP ports.
-* Identify running services.
-* Detect service versions.
-* Gather operating system information.
-* Identify potential attack vectors.
+| Flag | Purpose |
+|------|----------|
+| `-sS` | TCP SYN scan. |
+| `-sV` | Service version detection. |
+| `-A` | OS detection, script scanning, and traceroute. |
+| `-v` | Verbose output. |
+| `-oN` | Save results for documentation. |
 
----
+The scan provides information about exposed TCP ports, running services, operating system fingerprints, and additional service metadata useful for later exploitation.
 
-## Enumeration Findings
+### Nmap Scan Result
 
-The scan revealed an HTTP service running on **TCP port 3000**, indicating that the target web application was hosted on a non-default port.
+<p align="center">
+  <img src="../Screenshots/02_nmap.png" width="900">
+</p>
 
-The initial reconnaissance established:
+<p align="center"><em>Figure 3 — Nmap service enumeration results.</em></p>
 
-* A Linux target host.
-* Web application accessible on port **3000**.
-* No immediately obvious auxiliary services relevant to exploitation.
+### Findings
 
----
+The scan revealed:
 
-### Screenshot — Nmap Scan
+- The target exposed an HTTP service on **port 3000**.
+- Service fingerprinting confirmed the application was reachable over HTTP.
+- Additional version information provided context for later technology identification.
 
-> Place the following screenshot inside the repository.
+### Reconnaissance Outcome
 
-```markdown
-![Nmap Scan](../Screenshots/02_nmap.png)
-
-*Figure 1 — Initial reconnaissance using Nmap identifying the exposed HTTP service on port 3000.*
-```
-
----
-
-# Phase 2 — Web Enumeration
-
-## Initial Website Inspection
-
-The application was opened in a browser after discovering the HTTP service.
-
-The landing page appeared to be a **static corporate website** with:
-
-* Marketing content.
-* Navigation links.
-* No authentication portal.
-* No obvious forms or user input fields.
-
-At first glance, there were no visible vulnerabilities.
+| Finding | Security Value |
+|---------|----------------|
+| HTTP Service | Primary attack surface identified. |
+| Port 3000 | Non-standard web application port. |
+| Version Detection | Useful for technology fingerprinting. |
 
 ---
 
-### Screenshot — Website Landing Page
+# Web Enumeration
 
-```markdown
-![Target Website](../Screenshots/01_room.png)
+After identifying the exposed web application, I moved into application-level enumeration.
 
-*Figure 2 — Corp Website landing page running on TCP port 3000.*
-```
+The goal was to discover:
 
----
+- Hidden directories.
+- Administrative panels.
+- API endpoints.
+- Backup files.
+- Additional content not visible from the homepage.
 
 ## Directory Enumeration
 
-Directory fuzzing was performed to search for hidden application routes.
+The first enumeration technique involved brute-forcing directories using **Gobuster**.
 
-### Tool Used
+Example workflow:
 
-* Gobuster
+```bash
+gobuster dir -u http://<TARGET_IP>:3000 -w /path/to/wordlist.txt
+```
 
-### Objective
-
-* Discover hidden endpoints.
-* Locate administrative paths.
-* Identify backup directories or APIs.
+The objective was to discover hidden application routes that could expose additional functionality.
 
 ### Result
 
-No meaningful hidden directories were identified.
+No useful directories were discovered during enumeration.
 
 ---
 
 ## Subdomain Enumeration
 
-Additional reconnaissance included:
+To ensure no additional virtual hosts existed, I also performed subdomain enumeration.
 
-* Amass
-* Subfinder
+Tools used during this phase included:
 
-The goal was to identify virtual hosts or exposed subdomains.
+- Amass
+- Subfinder
+
+These tools help identify publicly available subdomains through passive and active reconnaissance techniques.
 
 ### Result
 
-No useful subdomains were discovered.
+No additional subdomains or virtual hosts were identified.
 
 ---
 
-## Assessment Observation
+## Enumeration Summary
 
-At this stage, traditional web enumeration produced minimal results.
+<p align="center">
+  <img src="../Screenshots/03_enum.png" width="900">
+</p>
 
-**Important Lesson**
+<p align="center"><em>Figure 4 — Directory and subdomain enumeration process.</em></p>
 
-> Enumeration should not stop when fuzzing fails. Technology identification becomes the next logical step.
+### What Was Attempted?
 
----
+| Enumeration Technique | Result |
+|----------------------|--------|
+| Gobuster | No interesting directories discovered. |
+| Amass | No useful subdomains identified. |
+| Subfinder | No additional hosts discovered. |
 
-### Screenshot — Enumeration Results
+### Key Takeaway
 
-```markdown
-![Enumeration](../Screenshots/03_enum.png)
-
-*Figure 3 — Directory and subdomain enumeration produced no valuable attack surface.*
-```
-
----
-
-# Phase 3 — Technology Fingerprinting
-
-## Identifying the Framework
-
-Closer inspection of the application's source and asset structure revealed indicators that the website was built using **Next.js**.
-
-### Indicators
-
-* Static JavaScript bundles.
-* Framework-specific routing.
-* Next.js asset directory structure.
-
-Recognizing the framework fundamentally changed the assessment approach.
+This stage is an important reminder that **negative enumeration results are still valuable findings**. Even though traditional content discovery did not expose an attack path, it narrowed the focus toward analyzing the application itself rather than searching for hidden endpoints.
 
 ---
 
-## Why Framework Fingerprinting Matters
+# Technology Fingerprinting
 
-Framework identification allows testers to:
+## Identifying the Application Framework
 
-* Research publicly disclosed vulnerabilities.
-* Understand framework routing behavior.
-* Test framework-specific attack surfaces.
-* Reduce unnecessary brute-force enumeration.
+After completing network and content enumeration, the next step was identifying the technologies powering the web application. Since directory fuzzing and subdomain enumeration did not reveal additional attack surfaces, understanding the framework became the primary focus.
 
-This was the turning point in the challenge.
+Modern web applications often expose framework-specific artifacts through JavaScript bundles, routing behavior, static assets, and HTTP response headers. Inspecting these characteristics helps narrow the attack surface and identify vulnerabilities relevant to the underlying technology stack.
+
+### Initial Analysis
+
+Several indicators suggested that the application was built using **Next.js**, a React-based framework commonly used for server-side rendering and static web applications.
+
+### Technology Fingerprinting Evidence
+
+<p align="center">
+  <img src="../Screenshots/04_nextjs.png" width="900">
+</p>
+
+<p align="center"><em>Figure 5 — Identifying the web application's underlying framework as Next.js.</em></p>
+
+### Indicators Observed
+
+| Indicator | Observation |
+|-----------|-------------|
+| Static asset structure | Framework-specific asset organization. |
+| JavaScript bundles | Naming conventions consistent with Next.js builds. |
+| Routing behavior | Client-side routing matched Next.js architecture. |
+| Response behavior | Application responses aligned with a Next.js deployment. |
+
+### Why Framework Fingerprinting Matters
+
+Technology fingerprinting changes the direction of a penetration test. Instead of performing generic web testing indefinitely, identifying the framework allows testing to focus on publicly documented vulnerabilities, misconfigurations, and security advisories relevant to that technology.
+
+> **Key Lesson:** Framework identification can reveal attack paths that traditional directory fuzzing may never expose.
 
 ---
 
-### Screenshot — Next.js Identification
-
-```markdown
-![Next.js Fingerprinting](../Screenshots/04_nextjs.png)
-
-*Figure 4 — Evidence indicating the application was built using the Next.js framework.*
-```
-
----
-
-# Phase 4 — Vulnerability Assessment
+# Vulnerability Assessment
 
 ## Automated Vulnerability Discovery
 
-With the framework identified, vulnerability assessment shifted toward framework-specific testing.
+Once the framework was identified, I moved into vulnerability assessment using **Nuclei**. The objective was to compare the detected technology against publicly known vulnerability templates.
 
-### Tool Used
+### Scanner Used
 
-* Nuclei
+- **Nuclei**
 
-### Objective
+### Purpose
 
-Identify publicly documented vulnerabilities affecting the detected framework.
+- Detect known vulnerabilities affecting exposed technologies.
+- Quickly identify potential attack vectors.
+- Generate findings that can later be validated manually.
 
-Example scan:
+### Scan Workflow
 
 ```bash
 nuclei -u http://<TARGET_IP>:3000
 ```
 
----
+This scan evaluates the target against community-maintained vulnerability templates for web technologies and frameworks.
 
-## Scan Results
+### Nuclei Scan Output
 
-The scanner reported a vulnerability associated with the detected application framework that indicated the possibility of **Remote Code Execution**.
+<p align="center">
+  <img src="../Screenshots/05_nuclei.png" width="900">
+</p>
 
-### Assessment Approach
-
-Rather than trusting the scanner output immediately:
-
-1. Review the finding.
-2. Research the vulnerability.
-3. Validate manually.
+<p align="center"><em>Figure 6 — Nuclei identifying a potential vulnerability affecting the detected framework.</em></p>
 
 ---
 
-## Manual Validation Required
+## Analysis of the Finding
 
-Automated vulnerability scanners provide indicators rather than proof.
+During the scan, one result stood out because it was associated with a **publicly documented vulnerability** affecting the identified framework.
 
-Manual validation helps determine:
+### Important Observation
 
-* False positives.
-* Exploitability.
-* Actual application behavior.
+The scanner suggested the application might be affected by a vulnerability capable of leading to **Remote Code Execution (RCE)** if certain conditions were met.
 
----
+### Research Phase
 
-### Screenshot — Nuclei Scan Output
+Rather than immediately assuming the finding was exploitable, I reviewed publicly available security information related to the identified vulnerability.
 
-```markdown
-![Nuclei Scan](../Screenshots/05_nuclei.png)
+The research focused on:
 
-*Figure 5 — Vulnerability scanner identifying a framework-related security issue requiring manual validation.*
-```
+- Affected framework versions.
+- Conditions required for exploitation.
+- Public advisories and disclosures.
+- Whether the lab environment intentionally simulated the vulnerable behavior.
 
----
+### Why Manual Validation Was Necessary
 
-# Phase 5 — Initial Access (Remote Code Execution)
+Automated scanners can generate:
 
-## Objective
+- False positives.
+- Version-based matches.
+- Informational findings.
+- Potential attack paths.
 
-Validate whether the identified vulnerability allows server-side command execution.
+A scanner result alone is **not proof** of exploitation.
 
----
-
-## Manual Testing with Burp Suite
-
-Burp Suite was used to inspect and replay HTTP requests.
-
-### Workflow
-
-1. Capture application request.
-2. Send request to Repeater.
-3. Modify request structure.
-4. Replay request.
-5. Observe server response.
-
-The validation confirmed that the application executed attacker-controlled commands within the lab environment.
+The next phase was validating whether the application actually exhibited the vulnerable behavior.
 
 ---
 
-## Result
+# Manual Vulnerability Validation
 
-Remote Code Execution was successfully achieved against the vulnerable application.
+## Using Burp Suite
 
-The initial foothold allowed command execution on the Linux target.
+To validate the suspected vulnerability, I intercepted application traffic using **Burp Suite**.
+
+Burp Suite provides visibility into HTTP requests and responses, making it possible to understand how the application processes user input.
+
+### Validation Workflow
+
+1. Capture an HTTP request sent by the application.
+2. Inspect request headers and body.
+3. Modify the request method where appropriate.
+4. Replay the request to the target.
+5. Observe server behavior.
+
+### Why Burp Suite?
+
+| Feature | Purpose |
+|--------|---------|
+| Proxy | Capture application traffic. |
+| Repeater | Replay and modify requests. |
+| Inspector | Analyze headers, parameters, and body. |
+| HTTP History | Compare request/response behavior. |
 
 ---
 
-### Screenshot — Burp Suite Request Validation
+## Request Analysis
 
-```markdown
-![Burp Suite RCE](../Screenshots/06_burp_rce.png)
+During inspection, I identified an endpoint that accepted structured request data. The request was modified for testing purposes inside **Burp Repeater**.
 
-*Figure 6 — HTTP request interception and manual validation using Burp Suite.*
-```
+> **Security Note:** The exact payload used in the TryHackMe lab is intentionally omitted from this repository. This documentation focuses on the methodology rather than publishing exploit payloads.
+
+### Burp Suite Validation
+
+<p align="center">
+  <img src="../Screenshots/06_burp_rce.png" width="900">
+</p>
+
+<p align="center"><em>Figure 7 — HTTP request interception and manual validation using Burp Suite.</em></p>
+
+### Validation Outcome
+
+After replaying the modified request, the application responded in a way that confirmed **remote command execution** within the authorized lab environment.
+
+This established the first successful foothold on the target.
 
 ---
 
-## Initial Flag
+# Initial Access
 
-Following successful command execution, the first challenge flag became accessible.
+## Confirming Remote Code Execution
 
-### Flag Status
+Successful validation demonstrated that the application executed attacker-controlled commands.
+
+This confirmed that the vulnerability was not merely detected by version matching—it was exploitable within the challenge environment.
+
+### Initial Access Achieved
+
+| Objective | Status |
+|-----------|--------|
+| Framework Identified | ✅ |
+| Vulnerability Detected | ✅ |
+| Manual Validation Completed | ✅ |
+| Remote Code Execution Confirmed | ✅ |
+
+### Security Impact
+
+Remote Code Execution represents one of the highest-impact web application vulnerabilities because it allows an attacker to execute commands on the underlying server within the permissions of the affected service.
+
+In this challenge, RCE served as the transition point from web application testing to operating system post-exploitation.
+
+---
+
+# Capturing the User Flag
+
+After confirming command execution, I explored the accessible filesystem from the compromised user context.
+
+The initial challenge objective was successfully completed.
+
+### User Flag
+
+> **Flag Redacted**
 
 ```text
-THM{**********************}
+THM{***********************}
 ```
 
-> **Flag intentionally redacted for educational purposes.**
+The actual flag has been intentionally removed from this documentation to avoid spoilers and plagiarism while preserving the educational workflow.
 
 ---
 
-### Screenshot — Initial Flag
+# Phase Summary
 
-```markdown
-![Initial Flag](../Screenshots/06_flag.png)
+The assessment reached a significant milestone during this stage.
 
-*Figure 7 — Initial user flag successfully retrieved (redacted in repository).*
-```
-
----
-
-# Phase 6 — Reverse Shell
-
-## Objective
-
-Upgrade command execution into an interactive shell.
-
-Interactive shells allow significantly more flexibility for local enumeration.
+| Phase | Outcome |
+|-------|---------|
+| Technology Fingerprinting | Next.js framework identified. |
+| Vulnerability Assessment | Publicly documented framework issue discovered. |
+| Manual Validation | Burp Suite confirmed application behavior. |
+| Initial Exploitation | Remote Code Execution achieved. |
+| Initial Objective | User flag captured (redacted). |
 
 ---
 
-## Listener Preparation
+## Key Takeaways from This Phase
 
-A Netcat listener was started on the attacking machine.
+- Technology fingerprinting is often more valuable than continuing blind directory fuzzing.
+- Vulnerability scanners should be treated as reconnaissance tools, not proof of exploitation.
+- Manual request validation is essential for confirming security findings.
+- Gaining command execution is only the beginning of an assessment; post-exploitation enumeration is the next critical step.
+
+---
+
+# Post-Exploitation
+
+## Transitioning from RCE to an Interactive Shell
+
+Successfully achieving **Remote Code Execution (RCE)** confirmed that commands could be executed on the target system. However, executing isolated commands through a web application is often inefficient for further enumeration.
+
+The next objective was to establish a fully interactive shell, enabling easier navigation of the filesystem, privilege enumeration, and post-exploitation activities.
+
+An interactive shell provides capabilities such as:
+
+- Executing commands in real time.
+- Browsing directories.
+- Enumerating users and permissions.
+- Running local enumeration utilities.
+- Preparing privilege escalation techniques.
+
+---
+
+# Establishing a Reverse Shell
+
+## Preparing the Listener
+
+Before triggering the reverse shell from the target, a Netcat listener was started on the attacking machine to receive the incoming connection.
+
+### Listener Command
 
 ```bash
 nc -lnvp 1337
 ```
 
----
+### Listener Breakdown
 
-## Reverse Shell Execution
+| Option | Purpose |
+|--------|---------|
+| `-l` | Listen for an incoming connection. |
+| `-n` | Disable DNS resolution. |
+| `-v` | Enable verbose output. |
+| `-p` | Specify the listening port. |
 
-The previously validated command execution vector was used to establish an interactive connection back to the attacking host.
-
----
-
-## Verification
-
-After the callback was received, an interactive shell was confirmed.
-
-Post-exploitation activities could now begin.
+Once the listener was ready, the reverse shell payload was executed through the previously validated command execution primitive.
 
 ---
 
-### Screenshot — Reverse Shell
+## Receiving the Reverse Shell
 
-```markdown
-![Reverse Shell](../Screenshots/07_shell.png)
+After triggering the payload, the target initiated a connection back to the listener, providing an interactive shell.
 
-*Figure 8 — Interactive reverse shell successfully established.*
-```
+<p align="center">
+  <img src="../Screenshots/07_shell.png" width="900">
+</p>
+
+<p align="center"><em>Figure 8 — Interactive reverse shell successfully established from the target machine.</em></p>
+
+### Verification Steps
+
+After obtaining shell access, several basic verification commands were executed to understand the current execution context.
+
+Typical verification included checking:
+
+- Current user.
+- Hostname.
+- Working directory.
+- Operating system.
+- Available shell.
+
+### Initial Access Summary
+
+| Check | Purpose |
+|-------|---------|
+| Current User | Identify compromised account. |
+| Hostname | Verify target environment. |
+| Working Directory | Understand execution location. |
+| Shell Type | Confirm interactive shell functionality. |
 
 ---
 
-# Phase 7 — Linux Privilege Escalation
+# Local Enumeration
 
-## Local Enumeration
+## Objective
 
-Once shell access was established, local enumeration focused on privilege boundaries.
+With interactive shell access established, the focus shifted to **local privilege enumeration**.
 
-Primary checks included:
+The purpose of this phase was to identify security misconfigurations that could allow escalation from the compromised user to root.
 
-* Current user.
-* Groups.
-* Kernel version.
-* Environment variables.
-* Installed binaries.
-* Sudo permissions.
+### Areas Investigated
+
+- User permissions.
+- Sudo privileges.
+- Environment variables.
+- Installed binaries.
+- Writable files and directories.
+- Scheduled tasks.
+- System information.
+
+### Enumeration Strategy
+
+A structured enumeration process reduces the likelihood of overlooking privilege escalation opportunities.
+
+| Enumeration Area | Reason |
+|------------------|--------|
+| User Identity | Determine current privilege level. |
+| Groups | Identify additional permissions. |
+| Sudo Rights | Discover executable privileged commands. |
+| Filesystem | Search for writable sensitive locations. |
+| Processes | Inspect running services. |
+| Environment | Identify configuration weaknesses. |
 
 ---
 
-## Enumerating sudo Permissions
+# Checking Sudo Permissions
 
-The most significant enumeration command was:
+One of the highest-value enumeration commands on Linux systems is:
 
 ```bash
 sudo -l
 ```
 
+This command lists the binaries that the current user is allowed to execute using **sudo**.
+
+### Why This Matters
+
+Misconfigured sudo permissions frequently create privilege escalation opportunities by allowing execution of powerful binaries without requiring a password.
+
 ---
 
-## Finding
+## Sudo Enumeration Output
 
-The current user could execute:
+<p align="center">
+  <img src="../Screenshots/08_sudo.png" width="900">
+</p>
+
+<p align="center"><em>Figure 9 — Passwordless sudo permissions identified during local enumeration.</em></p>
+
+### Important Discovery
+
+The compromised user was permitted to execute:
 
 ```text
 /usr/bin/python3
 ```
 
-using `sudo` **without entering a password**.
+using `sudo` **without requiring a password**.
 
-This represented a serious privilege escalation opportunity.
+### Security Impact
 
----
+Allowing unrestricted execution of scripting interpreters with elevated privileges violates the principle of least privilege and can enable complete system compromise.
 
-### Why This Is Dangerous
+### Why Python Is Dangerous Here
 
-Allowing unrestricted execution of scripting interpreters through `sudo` effectively grants administrative command execution.
+Python is not merely an application—it is a scripting interpreter capable of executing arbitrary operating system commands.
 
-Examples include:
-
-* Python
-* Perl
-* Ruby
-* Bash
-* Lua
-
-Misconfigured interpreters frequently lead to privilege escalation.
+This makes unrestricted privileged execution particularly dangerous.
 
 ---
 
-### Screenshot — sudo Enumeration
+# Privilege Escalation
 
-```markdown
-![sudo Enumeration](../Screenshots/08_sudo.png)
+## Identifying the Escalation Path
 
-*Figure 9 — Passwordless Python execution identified through sudo enumeration.*
+The discovered sudo configuration created a straightforward privilege escalation opportunity.
+
+The attack path became:
+
+```text
+Compromised User
+        │
+        ▼
+Passwordless sudo Permission
+        │
+        ▼
+Privileged Python Interpreter
+        │
+        ▼
+Root Shell
 ```
 
 ---
 
-# Phase 8 — Privilege Escalation
+## Exploiting the Misconfiguration
 
-## Exploitation Strategy
+The privileged Python interpreter was used to spawn a shell with elevated privileges.
 
-Because Python could be executed with elevated privileges, it was possible to spawn a privileged shell.
+> **Note:** The exact escalation command used during the TryHackMe room has intentionally been omitted from this public repository. The purpose of this documentation is to explain the privilege escalation methodology without publishing exploit commands.
 
-This immediately transitioned execution from the compromised user to the root user.
+### Escalation Result
 
----
+The shell immediately transitioned into the **root** security context.
 
-## Root Verification
+### Verification
 
-After escalation, system identity confirmed:
-
-* Effective UID = Root.
-* Administrative permissions available.
+Privilege escalation was confirmed by validating the effective user identity and current privileges.
 
 ---
 
-### Screenshot — Root Shell
+# Root Shell Verification
 
-```markdown
-![Root Shell](../Screenshots/09_root.png)
+After successful privilege escalation, the shell was running with **UID 0**, indicating root privileges.
 
-*Figure 10 — Successful privilege escalation resulting in a root shell.*
-```
+This provided unrestricted access to the system within the authorized TryHackMe lab environment.
+
+<p align="center">
+  <img src="../Screenshots/09_root.png" width="900">
+</p>
+
+<p align="center"><em>Figure 10 — Root shell obtained after exploiting the sudo misconfiguration.</em></p>
+
+### Root Access Validation
+
+| Validation | Result |
+|-----------|--------|
+| Effective User | Root |
+| Privilege Level | Administrative |
+| Objective | Successfully completed |
 
 ---
 
 # Capturing the Root Flag
 
-The final objective was located within the root user's directory.
+With administrative access confirmed, the final objective of the room was completed.
 
-### Flag Status
+### Root Flag Location
+
+The root flag was located within the root user's directory.
+
+> **Flag Redacted**
 
 ```text
-THM{******************************}
+THM{********************************}
 ```
 
-> **Root flag intentionally redacted.**
+The flag has been intentionally removed from this documentation to preserve the integrity of the TryHackMe challenge.
 
 ---
 
-### Screenshot — Root Flag
+# Privilege Escalation Analysis
 
-```markdown
-![Root Flag](../Screenshots/10_rootflag.png)
+## Root Cause
 
-*Figure 11 — Root flag captured successfully (redacted).*
-```
+The privilege escalation was possible because of a **security misconfiguration** rather than a kernel vulnerability.
+
+### Misconfiguration Summary
+
+| Misconfiguration | Impact |
+|------------------|--------|
+| Passwordless sudo | Elevated execution without authentication. |
+| Python Interpreter Allowed | Arbitrary command execution with elevated privileges. |
+| Least Privilege Not Enforced | Complete system compromise. |
+
+### Security Lesson
+
+A scripting interpreter granted unrestricted sudo permissions effectively provides administrative command execution capabilities.
+
+This demonstrates why organizations should carefully review `sudoers` configurations and avoid allowing interpreters unrestricted privileged execution.
+
+---
+
+# Post-Exploitation Summary
+
+The post-exploitation phase progressed through the following stages:
+
+| Stage | Outcome |
+|-------|---------|
+| Remote Code Execution | Initial foothold established. |
+| Reverse Shell | Interactive Linux shell obtained. |
+| Local Enumeration | User privileges inspected. |
+| Sudo Enumeration | Passwordless Python execution identified. |
+| Privilege Escalation | Root shell obtained successfully. |
+| Final Objective | Root flag captured (redacted). |
+
+---
+
+## Key Takeaways from Post-Exploitation
+
+- Interactive shells provide significantly better visibility than isolated command execution.
+- Local enumeration should begin immediately after obtaining a shell.
+- `sudo -l` is one of the most valuable privilege enumeration commands.
+- Misconfigured sudo permissions remain a common privilege escalation vector.
+- Security assessments should always validate privilege boundaries after gaining initial access.
+
+At this point, the assessment shifted away from brute-force enumeration and toward **technology fingerprinting**, which ultimately revealed the real attack vector.
 
 ---
 
 # MITRE ATT&CK Mapping
 
-| **Technique**                         | **Purpose**                                      |
-| ------------------------------------- | ------------------------------------------------ |
-| Network Service Scanning              | Identify exposed services.                       |
-| Exploit Public-Facing Application     | Initial compromise through the web application.  |
-| Command and Scripting Interpreter     | Execute Linux commands after RCE.                |
-| Unix Shell                            | Interactive shell activity.                      |
-| Sudo Abuse                            | Privilege escalation through sudo configuration. |
-| Exploitation for Privilege Escalation | Transition from user privileges to root.         |
+This room can be mapped to several MITRE ATT&CK techniques to better understand the tactics and techniques demonstrated during the engagement.
 
-> These mappings describe concepts demonstrated during the lab rather than attribution to real-world adversaries.
+| MITRE ATT&CK Technique | Description |
+|-------------------------|-------------|
+| **T1046 — Network Service Discovery** | Enumerating exposed network services using Nmap. |
+| **T1190 — Exploit Public-Facing Application** | Exploiting a vulnerability exposed through the web application. |
+| **T1059 — Command and Scripting Interpreter** | Executing operating system commands after achieving RCE. |
+| **T1059.004 — Unix Shell** | Obtaining and interacting with a Linux shell. |
+| **T1548.003 — Sudo and Sudo Caching** | Abusing passwordless sudo permissions for privilege escalation. |
+| **T1068 — Exploitation for Privilege Escalation** | Escalating from a compromised user account to root privileges. |
+
+### MITRE ATT&CK Flow
+
+```text
+Reconnaissance
+        │
+        ▼
+Network Service Discovery
+        │
+        ▼
+Public-Facing Application Exploitation
+        │
+        ▼
+Command Execution
+        │
+        ▼
+Interactive Unix Shell
+        │
+        ▼
+Privilege Escalation via sudo
+        │
+        ▼
+Root Access
+```
+
+> These mappings are included for educational purposes and to connect the lab workflow with a commonly used adversary behavior framework.
 
 ---
 
-# OWASP Mapping
+# OWASP Top 10 Mapping
 
-| **OWASP Category**        | **Application in Lab**            |
-| ------------------------- | --------------------------------- |
-| Security Misconfiguration | Passwordless sudo configuration.  |
-| Vulnerable Components     | Framework vulnerability research. |
-| Broken Access Control     | Improper privilege boundaries.    |
+The techniques demonstrated during this room align with multiple OWASP Top 10 security concepts.
+
+| OWASP Category | Relevance to the Lab |
+|----------------|----------------------|
+| **A01 — Broken Access Control** | Excessive privileges allowed escalation through sudo. |
+| **A05 — Security Misconfiguration** | Improper sudo configuration created a privilege escalation path. |
+| **A06 — Vulnerable and Outdated Components** | The web application relied on a vulnerable framework version. |
+
+### Security Perspective
+
+The challenge highlights how vulnerabilities can exist across different layers:
+
+- Application Layer
+- Framework Layer
+- Operating System Layer
+- Privilege Configuration Layer
+
+A successful compromise required chaining weaknesses across these layers rather than exploiting a single issue.
 
 ---
 
-# Defensive Recommendations
+# Attack Chain Summary
+
+The complete penetration testing workflow followed throughout this assessment is summarized below.
+
+| Phase | Objective | Outcome |
+|-------|-----------|---------|
+| **Reconnaissance** | Discover exposed services. | Web application identified on port 3000. |
+| **Enumeration** | Search for hidden attack surface. | No useful directories or subdomains found. |
+| **Technology Fingerprinting** | Identify framework. | Next.js identified. |
+| **Vulnerability Assessment** | Detect known vulnerabilities. | Publicly documented framework issue identified. |
+| **Manual Validation** | Confirm vulnerability. | Remote Code Execution achieved. |
+| **Initial Access** | Gain shell access. | Reverse shell established. |
+| **Privilege Enumeration** | Inspect permissions. | Passwordless sudo identified. |
+| **Privilege Escalation** | Gain administrative access. | Root shell obtained. |
+| **Objective Complete** | Capture final objective. | Root flag retrieved (redacted). |
+
+---
+
+# Security Recommendations
+
+This room demonstrates several defensive practices that could prevent similar attack paths in production environments.
 
 ## Web Application Security
 
-* Keep framework dependencies updated.
-* Monitor application security advisories.
-* Restrict unnecessary endpoints.
-* Validate request methods and payloads.
-* Deploy Web Application Firewall protections where appropriate.
+- Keep application frameworks and dependencies updated with security patches.
+- Monitor public vulnerability disclosures affecting deployed technologies.
+- Validate and sanitize server-side request processing.
+- Restrict unnecessary endpoints and exposed functionality.
+- Review application configurations before deployment.
 
----
+## Linux System Hardening
 
-## Linux Hardening
+- Apply the **Principle of Least Privilege**.
+- Review `sudoers` configuration regularly.
+- Avoid granting unrestricted sudo access to scripting interpreters.
+- Audit privileged binaries periodically.
+- Remove unnecessary administrative permissions.
 
-* Remove unnecessary passwordless sudo entries.
-* Apply least privilege principles.
-* Restrict scripting interpreters from privileged execution.
-* Audit `/etc/sudoers` regularly.
+## Detection & Monitoring
 
----
+Security monitoring solutions should generate alerts for:
 
-## Detection Opportunities
-
-Security monitoring should alert on:
-
-* Unexpected POST requests to application endpoints.
-* Web server child processes spawning shells.
-* Outbound reverse-shell connections.
-* Passwordless execution of privileged interpreters.
+- Suspicious POST requests.
+- Unexpected server-side command execution.
+- Outbound reverse-shell connections.
+- Privileged interpreter execution.
+- Unusual sudo activity.
 
 ---
 
 # Lessons Learned
 
-This room emphasized several practical penetration testing lessons.
+This room provided practical experience across multiple phases of a penetration test.
 
-### Reconnaissance Matters
+## Key Technical Lessons
 
-Accurate service discovery provides the foundation for every assessment.
+### 1. Technology Fingerprinting Matters
 
-### Framework Awareness Is Critical
+Directory fuzzing was not enough to identify the attack path. Understanding the underlying framework revealed where further research should focus.
 
-Technology fingerprinting can reveal attack paths invisible to directory enumeration alone.
+### 2. Automated Tools Require Manual Validation
 
-### Validate Automated Findings
+Nuclei provided a valuable lead, but Burp Suite was required to verify whether the vulnerability was genuinely exploitable.
 
-Scanner results should always be manually confirmed before exploitation.
+### 3. Enumeration Never Stops
 
-### Enumerate After Every Foothold
+Enumeration continues after gaining initial access. Local privilege enumeration is just as important as web enumeration.
 
-Local enumeration often reveals privilege escalation opportunities that automated tools miss.
+### 4. Sudo Misconfigurations Are High Risk
 
-### Misconfigured sudo Remains High Risk
+Passwordless sudo permissions for scripting interpreters can immediately lead to complete privilege escalation.
 
-Passwordless execution of interpreters can result in complete system compromise.
+### 5. Documentation Is Part of Penetration Testing
+
+Recording methodology, evidence, findings, and defensive recommendations creates a professional security assessment that is reproducible and useful for future reference.
+
+---
+
+# Skills Demonstrated
+
+This challenge helped strengthen practical experience in the following areas.
+
+| Domain | Skills Demonstrated |
+|--------|----------------------|
+| **Reconnaissance** | Nmap service enumeration and host discovery. |
+| **Web Security** | Application fingerprinting and framework analysis. |
+| **Vulnerability Assessment** | Nuclei scanning and vulnerability research. |
+| **Manual Testing** | Burp Suite request interception and validation. |
+| **Post-Exploitation** | Reverse shell establishment and Linux enumeration. |
+| **Privilege Escalation** | Passwordless sudo exploitation methodology. |
+| **Reporting** | Professional penetration testing documentation. |
+
+---
+
+# Blue Team Perspective
+
+Understanding how an attack works helps defenders build better detections and mitigations.
+
+### Defensive Improvements
+
+- Maintain an inventory of application framework versions.
+- Patch vulnerable software promptly.
+- Harden Linux privilege configurations.
+- Audit privileged command execution.
+- Monitor unusual web server behavior.
+- Restrict administrative interpreters from passwordless sudo.
+
+### Detection Opportunities
+
+Potential detection rules include:
+
+- Abnormal HTTP POST requests.
+- Web server spawning shell processes.
+- Reverse-shell network connections.
+- Passwordless sudo execution.
+- Privileged Python execution.
+
+---
+
+# References
+
+The following resources were useful for understanding the technologies involved in this lab.
+
+- TryHackMe — Corp Website Room.
+- Nmap Documentation.
+- Burp Suite Documentation.
+- Nuclei Documentation.
+- Next.js Security Documentation.
+- MITRE ATT&CK Framework.
+- OWASP Web Security Testing Guide.
+
+> References are included for educational purposes and do not contain challenge flags or proprietary lab solutions.
+
+---
+
+# Repository Structure
+
+```text
+Corp-Website-TryHackMe-Walkthrough/
+│
+├── README.md
+├── LICENSE
+├── SECURITY.md
+├── CONTRIBUTING.md
+├── CODE_OF_CONDUCT.md
+│
+├── Documentation/
+│   ├── Corp_Website_Documentation.md
+│   ├── Corp_Website_Documentation.docx
+│   └── Tools_Used.md
+│
+├── Screenshots/
+│   ├── 01_room.png
+│   ├── 02_nmap.png
+│   ├── 03_enum.png
+│   ├── 04_nextjs.png
+│   ├── 05_nuclei.png
+│   ├── 06_burp_rce.png
+│   ├── 07_shell.png
+│   ├── 08_sudo.png
+│   └── 09_root.png
+│
+├── Resources/
+│   ├── notes.md
+│   └── references.md
+│
+└── docs/
+    ├── index.md
+    ├── methodology.md
+    └── architecture.md
+```
 
 ---
 
 # Conclusion
 
-The **Corp Website** TryHackMe room demonstrates a realistic end-to-end web exploitation workflow beginning with reconnaissance and ending with full root compromise.
+The **Corp Website (Romance & Co)** room demonstrates a complete web penetration testing workflow that combines reconnaissance, framework identification, vulnerability research, manual exploitation, post-exploitation enumeration, and Linux privilege escalation.
 
-The assessment combined:
+One of the biggest lessons from this challenge is that **understanding the technology stack is often more valuable than relying solely on automated enumeration tools**. Identifying the application as a **Next.js** deployment shifted the assessment toward framework-specific vulnerability research, ultimately leading to successful remote code execution.
 
-* Network enumeration.
-* Web application analysis.
-* Framework fingerprinting.
-* Vulnerability assessment.
-* Manual exploitation validation.
-* Reverse shell establishment.
-* Linux privilege escalation.
+After gaining an initial foothold, careful Linux enumeration revealed a passwordless `sudo` configuration that allowed escalation to root privileges. This reinforces an important defensive principle: **security misconfigurations can be just as impactful as software vulnerabilities.**
 
-Although the initial website appeared static and resistant to traditional enumeration, identifying the underlying **Next.js** framework revealed the actual attack vector. After obtaining initial access, systematic Linux privilege enumeration uncovered an insecure `sudo` configuration that enabled root access.
-
-This room reinforces the importance of combining **methodical enumeration, technology awareness, manual validation, and post-exploitation privilege analysis** into a structured penetration testing workflow.
+This walkthrough intentionally focuses on the methodology, evidence, and security concepts while **redacting all challenge flags** to preserve the educational value of the room.
 
 ---
 
-# Key Takeaways
+# Author
 
-* Perform reconnaissance before interacting with the application.
-* Identify frameworks and technologies early in the assessment.
-* Use automated scanners to identify potential vulnerabilities, but validate findings manually.
-* Establish interactive shells for effective post-exploitation enumeration.
-* Always inspect `sudo` permissions after gaining a foothold.
-* Document every stage of an assessment with screenshots and technical observations.
+## 👨‍💻 Anurag RVNKR
 
----
+**Cybersecurity | Ethical Hacking | Penetration Testing | Web Security | TryHackMe**
 
-## Disclaimer
+This repository is part of my cybersecurity learning portfolio and documents hands-on labs completed through legal Capture The Flag environments.
 
-This walkthrough documents activity performed inside an **authorized TryHackMe laboratory environment** for educational purposes.
+### Connect
 
-* Challenge flags have been intentionally redacted.
-* No exploit payloads are published in this repository.
-* The repository focuses on penetration testing methodology, defensive learning, and technical documentation.
+- GitHub: **anurag-rvnkr1**
+- Platform: **TryHackMe**
 
 ---
 
-**Author:** **Anurag Revankar**
+# Educational Disclaimer
 
-*Cybersecurity Portfolio • TryHackMe Walkthrough Series • 2026*
+> This repository documents a Capture The Flag challenge completed inside an **authorized TryHackMe training environment**.
+>
+> All techniques discussed are intended solely for:
+>
+> - Cybersecurity education.
+> - Ethical hacking practice.
+> - Authorized penetration testing.
+> - Defensive security research.
+>
+> Do **not** use these techniques against systems without explicit authorization.
+
+---
+
+<p align="center">
+  <strong>Reconnaissance → Enumeration → Validation → Exploitation → Privilege Escalation → Documentation</strong>
+</p>
+
+<p align="center">
+  ⭐ If you found this walkthrough useful, consider starring the repository.
+</p>
