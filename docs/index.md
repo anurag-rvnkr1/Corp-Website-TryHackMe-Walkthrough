@@ -1,6 +1,6 @@
 ---
 layout: default
-title: "Corp Website — TryHackMe CTF"
+title: "Corp Website — TryHackMe CTF Walkthrough"
 description: "Professional documentation of the Corp Website TryHackMe CTF covering reconnaissance, Next.js security research, remote code execution, reverse shell access, and Linux privilege escalation."
 category: "TryHackMe // Web Security"
 tags:
@@ -14,123 +14,21 @@ tags:
 
 <div class="ctf-hero">
 
-<h1>Corp Website</h1>
+# Corp Website — TryHackMe CTF Walkthrough
 
 <p>
-  A complete technical walkthrough of the <strong>Corp Website (Romance &amp; Co)</strong>
-  TryHackMe challenge, documenting the path from web reconnaissance and Next.js
-  technology fingerprinting through remote code execution, reverse-shell access,
-  Linux privilege enumeration, and root-level privilege escalation.
+A structured penetration-testing assessment of a Linux-hosted web application, progressing from network reconnaissance and framework identification through validated remote code execution, reverse-shell access, and passwordless sudo-based privilege escalation.
 </p>
 
 <div class="ctf-badges">
-  <span class="ctf-badge">TryHackMe</span>
-  <span class="ctf-badge">Medium</span>
-  <span class="ctf-badge">Web Security</span>
-  <span class="ctf-badge">Linux</span>
-  <span class="ctf-badge">Next.js</span>
-  <span class="ctf-badge">Remote Code Execution</span>
-  <span class="ctf-badge">Privilege Escalation</span>
-</div>
 
-</div>
+<span class="ctf-badge">TRYHACKME</span>
+<span class="ctf-badge">WEB SECURITY</span>
+<span class="ctf-badge">NEXT.JS</span>
+<span class="ctf-badge">RCE</span>
+<span class="ctf-badge">LINUX</span>
+<span class="ctf-badge">PRIVILEGE ESCALATION</span>
 
-> **Portfolio note:** Flags are intentionally redacted throughout this documentation. The objective is to demonstrate reconnaissance, technical reasoning, vulnerability validation, exploitation methodology, evidence collection, and security understanding without publishing challenge answers.
-
----
-
-## Mission
-
-The objective of this assessment was to compromise the **Corp Website (Romance & Co)** TryHackMe target through its exposed web application and progress from initial web access to **root-level access**.
-
-The documented engagement demonstrates a complete offensive-security workflow:
-
-<div class="attack-chain">
-
-<div class="attack-step">Reconnaissance</div>
-<div class="attack-arrow">→</div>
-<div class="attack-step">Enumeration</div>
-<div class="attack-arrow">→</div>
-<div class="attack-step">Technology Fingerprinting</div>
-<div class="attack-arrow">→</div>
-<div class="attack-step">Vulnerability Discovery</div>
-<div class="attack-arrow">→</div>
-<div class="attack-step">RCE Validation</div>
-<div class="attack-arrow">→</div>
-<div class="attack-step">Reverse Shell</div>
-<div class="attack-arrow">→</div>
-<div class="attack-step">Privilege Escalation</div>
-<div class="attack-arrow">→</div>
-<div class="attack-step">Root</div>
-
-</div>
-
-The key methodological decision was to move from generic enumeration toward **framework-specific security research** after identifying the target's use of Next.js.
-
----
-
-## Quick Overview
-
-<div class="ctf-card-grid">
-
-<div class="ctf-card">
-  <div class="ctf-card-title">Platform</div>
-  <div class="ctf-card-value">TryHackMe</div>
-</div>
-
-<div class="ctf-card">
-  <div class="ctf-card-title">Room</div>
-  <div class="ctf-card-value">Corp Website</div>
-</div>
-
-<div class="ctf-card">
-  <div class="ctf-card-title">Theme</div>
-  <div class="ctf-card-value">Romance &amp; Co</div>
-</div>
-
-<div class="ctf-card">
-  <div class="ctf-card-title">Difficulty</div>
-  <div class="ctf-card-value">Medium</div>
-</div>
-
-<div class="ctf-card">
-  <div class="ctf-card-title">Category</div>
-  <div class="ctf-card-value">Web Security</div>
-</div>
-
-<div class="ctf-card">
-  <div class="ctf-card-title">Target OS</div>
-  <div class="ctf-card-value">Linux</div>
-</div>
-
-<div class="ctf-card">
-  <div class="ctf-card-title">Web Service</div>
-  <div class="ctf-card-value">TCP/3000</div>
-</div>
-
-<div class="ctf-card">
-  <div class="ctf-card-title">Application</div>
-  <div class="ctf-card-value">Next.js</div>
-</div>
-
-<div class="ctf-card">
-  <div class="ctf-card-title">Initial Access</div>
-  <div class="ctf-card-value">Remote Code Execution</div>
-</div>
-
-<div class="ctf-card">
-  <div class="ctf-card-title">Privilege Escalation</div>
-  <div class="ctf-card-value">Passwordless sudo</div>
-</div>
-
-<div class="ctf-card">
-  <div class="ctf-card-title">Privileged Binary</div>
-  <div class="ctf-card-value"><code>/usr/bin/python3</code></div>
-</div>
-
-<div class="ctf-card">
-  <div class="ctf-card-title">Status</div>
-  <div class="ctf-card-value">Completed</div>
 </div>
 
 </div>
@@ -144,18 +42,17 @@ The key methodological decision was to move from generic enumeration toward **fr
 <div class="ctf-toc-title">Documentation Map</div>
 
 - [Mission](#mission)
-- [Quick Overview](#quick-overview)
-- [Navigation](#navigation)
+- [Challenge Profile](#challenge-profile)
+- [Assessment Workflow](#assessment-workflow)
 - [Skills Demonstrated](#skills-demonstrated)
-- [Attack Chain](#attack-chain)
-- [Lab Context](#lab-context)
-- [Initial Reconnaissance](#initial-reconnaissance)
+- [Attack Surface](#attack-surface)
+- [Reconnaissance](#reconnaissance)
 - [Network and Service Enumeration](#network-and-service-enumeration)
 - [Directory and Subdomain Enumeration](#directory-and-subdomain-enumeration)
 - [Technology Fingerprinting](#technology-fingerprinting)
 - [Vulnerability Discovery](#vulnerability-discovery)
-- [Vulnerability Research and Validation](#vulnerability-research-and-validation)
-- [Initial Access](#initial-access)
+- [Vulnerability Validation](#vulnerability-validation)
+- [Exploitation and Initial Access](#exploitation-and-initial-access)
 - [Reverse Shell](#reverse-shell)
 - [Local Privilege Enumeration](#local-privilege-enumeration)
 - [Privilege Escalation](#privilege-escalation)
@@ -172,219 +69,289 @@ The key methodological decision was to move from generic enumeration toward **fr
 - [Portfolio Value](#portfolio-value)
 - [References](#references)
 - [Responsible Use](#responsible-use)
+- [Final Summary](#final-summary)
 
 </div>
 
 ---
 
-## Skills Demonstrated
+# Mission
+
+The **Corp Website** challenge demonstrates a complete offensive-security workflow against a Linux-hosted web application.
+
+The assessment began with network and application reconnaissance, progressed through technology fingerprinting and automated vulnerability discovery, and then used manual HTTP analysis to validate remote command execution.
+
+After obtaining host-level access, local privilege enumeration revealed an overly permissive `sudo` configuration that allowed passwordless execution of `/usr/bin/python3`. This configuration was then leveraged to obtain root access within the authorized TryHackMe environment.
+
+<div class="key-finding">
+
+<div class="key-finding-title">Assessment Objective</div>
+
+Identify the exposed application, determine its technology stack, discover and validate the attack path, obtain host-level access, enumerate local privileges, and complete the challenge with root-level access.
+
+</div>
+
+---
+
+# Challenge Profile
+
+<div class="ctf-card-grid">
+
+<div class="ctf-card">
+<div class="ctf-card-title">Platform</div>
+<div class="ctf-card-value">TryHackMe</div>
+</div>
+
+<div class="ctf-card">
+<div class="ctf-card-title">Room</div>
+<div class="ctf-card-value">Corp Website</div>
+</div>
+
+<div class="ctf-card">
+<div class="ctf-card-title">Theme</div>
+<div class="ctf-card-value">Romance &amp; Co</div>
+</div>
+
+<div class="ctf-card">
+<div class="ctf-card-title">Difficulty</div>
+<div class="ctf-card-value">Medium</div>
+</div>
+
+<div class="ctf-card">
+<div class="ctf-card-title">Category</div>
+<div class="ctf-card-value">Web Security</div>
+</div>
+
+<div class="ctf-card">
+<div class="ctf-card-title">Target OS</div>
+<div class="ctf-card-value">Linux</div>
+</div>
+
+<div class="ctf-card">
+<div class="ctf-card-title">Web Port</div>
+<div class="ctf-card-value">3000/tcp</div>
+</div>
+
+<div class="ctf-card">
+<div class="ctf-card-title">Framework</div>
+<div class="ctf-card-value">Next.js</div>
+</div>
+
+<div class="ctf-card">
+<div class="ctf-card-title">Initial Access</div>
+<div class="ctf-card-value">Remote Code Execution</div>
+</div>
+
+<div class="ctf-card">
+<div class="ctf-card-title">Post-Exploitation</div>
+<div class="ctf-card-value">Reverse Shell</div>
+</div>
+
+<div class="ctf-card">
+<div class="ctf-card-title">Privilege Escalation</div>
+<div class="ctf-card-value">Passwordless sudo</div>
+</div>
+
+<div class="ctf-card">
+<div class="ctf-card-title">Privileged Binary</div>
+<div class="ctf-card-value">/usr/bin/python3</div>
+</div>
+
+<div class="ctf-card">
+<div class="ctf-card-title">Final Objective</div>
+<div class="ctf-card-value">Root Access</div>
+</div>
+
+<div class="ctf-card">
+<div class="ctf-card-title">Status</div>
+<div class="ctf-card-value">Completed</div>
+</div>
+
+</div>
+
+---
+
+# Assessment Workflow
+
+The assessment followed an adaptive methodology rather than relying on a single enumeration technique.
+
+<div class="attack-chain">
+
+<div class="attack-step">
+<strong>01</strong>
+<span>Web Application</span>
+</div>
+
+<div class="attack-arrow">↓</div>
+
+<div class="attack-step">
+<strong>02</strong>
+<span>Technology Fingerprinting</span>
+</div>
+
+<div class="attack-arrow">↓</div>
+
+<div class="attack-step">
+<strong>03</strong>
+<span>Vulnerability Discovery</span>
+</div>
+
+<div class="attack-arrow">↓</div>
+
+<div class="attack-step">
+<strong>04</strong>
+<span>Remote Code Execution</span>
+</div>
+
+<div class="attack-arrow">↓</div>
+
+<div class="attack-step">
+<strong>05</strong>
+<span>Reverse Shell</span>
+</div>
+
+<div class="attack-arrow">↓</div>
+
+<div class="attack-step">
+<strong>06</strong>
+<span>Local Enumeration</span>
+</div>
+
+<div class="attack-arrow">↓</div>
+
+<div class="attack-step">
+<strong>07</strong>
+<span>Sudo Misconfiguration</span>
+</div>
+
+<div class="attack-arrow">↓</div>
+
+<div class="attack-step">
+<strong>08</strong>
+<span>Root Access</span>
+</div>
+
+</div>
+
+The resulting attack path can be summarized as:
+
+```text
+Port 3000
+    ↓
+Next.js
+    ↓
+Framework Vulnerability
+    ↓
+Remote Code Execution
+    ↓
+Reverse Shell
+    ↓
+sudo -l
+    ↓
+Passwordless Python
+    ↓
+Root
+```
+
+---
+
+# Skills Demonstrated
 
 <div class="tool-list">
 
 <span class="tool-tag">Network Reconnaissance</span>
 <span class="tool-tag">Service Enumeration</span>
-<span class="tool-tag">Web Enumeration</span>
+<span class="tool-tag">Web Application Enumeration</span>
 <span class="tool-tag">Directory Discovery</span>
-<span class="tool-tag">Subdomain Enumeration</span>
+<span class="tool-tag">Subdomain Discovery</span>
 <span class="tool-tag">Technology Fingerprinting</span>
 <span class="tool-tag">Next.js Security Research</span>
-<span class="tool-tag">Nuclei Assessment</span>
-<span class="tool-tag">Burp Suite</span>
-<span class="tool-tag">Remote Code Execution</span>
+<span class="tool-tag">Vulnerability Scanning</span>
+<span class="tool-tag">HTTP Request Analysis</span>
+<span class="tool-tag">RCE Validation</span>
 <span class="tool-tag">Reverse Shells</span>
-<span class="tool-tag">Linux Enumeration</span>
+<span class="tool-tag">Linux Privilege Enumeration</span>
 <span class="tool-tag">Sudo Analysis</span>
 <span class="tool-tag">Privilege Escalation</span>
 <span class="tool-tag">Security Documentation</span>
 
 </div>
 
-The challenge provided hands-on practice in:
-
-- Network reconnaissance
-- Service enumeration
-- Web application enumeration
-- Directory and subdomain discovery
-- Technology fingerprinting
-- Next.js security research
-- Automated vulnerability scanning
-- Manual HTTP request analysis
-- Remote Code Execution validation
-- Reverse shell establishment
-- Linux privilege enumeration
-- Sudo misconfiguration analysis
-- Privilege escalation
-- Security documentation and evidence reporting
-
 ---
 
-## Attack Chain
+# Attack Surface
 
-The complete documented attack path was:
-
-<div class="attack-chain">
-
-<div class="attack-step">Target Host</div>
-<div class="attack-arrow">→</div>
-<div class="attack-step">Nmap</div>
-<div class="attack-arrow">→</div>
-<div class="attack-step">Web Review</div>
-<div class="attack-arrow">→</div>
-<div class="attack-step">Next.js</div>
-<div class="attack-arrow">→</div>
-<div class="attack-step">Nuclei</div>
-<div class="attack-arrow">→</div>
-<div class="attack-step">Burp Validation</div>
-<div class="attack-arrow">→</div>
-<div class="attack-step">RCE</div>
-<div class="attack-arrow">→</div>
-<div class="attack-step">Reverse Shell</div>
-<div class="attack-arrow">→</div>
-<div class="attack-step"><code>sudo -l</code></div>
-<div class="attack-arrow">→</div>
-<div class="attack-step">NOPASSWD Python 3</div>
-<div class="attack-arrow">→</div>
-<div class="attack-step">Root</div>
-
-</div>
+The initial assessment identified a web application exposed on:
 
 ```text
-Target Host
-     ↓
-Nmap Reconnaissance
-     ↓
-Web Application Review
-     ↓
-Next.js Fingerprinting
-     ↓
-Nuclei Vulnerability Discovery
-     ↓
-Burp Suite Manual Validation
-     ↓
-Remote Code Execution
-     ↓
-Reverse Shell
-     ↓
-sudo -l
-     ↓
-Passwordless Python 3 Execution
-     ↓
-Root Shell
+3000/tcp
 ```
 
-The engagement therefore moved from **external attack-surface discovery** into **application-layer exploitation**, followed by **host-level post-exploitation** and **local privilege escalation**.
+The exposed application became the primary attack surface.
+
+The assessment then progressed through four major security layers:
+
+| Layer | Assessment Focus | Result |
+|---|---|---|
+| Network | Port and service discovery | Web application identified |
+| Application | Directory, subdomain, and framework analysis | Next.js identified |
+| Exploitation | Automated discovery and manual validation | RCE confirmed |
+| Host | Shell and privilege enumeration | Root access obtained |
+
+This progression demonstrates how application-layer reconnaissance can transition into host-level post-exploitation when vulnerabilities are successfully chained.
 
 ---
 
-# Lab Context
+# Reconnaissance
 
-## Room Information
+## Room and Target Context
 
-<div class="ctf-details">
+The initial room context established the target environment and provided the starting point for the assessment.
 
-<div class="ctf-detail">
-  <span class="ctf-detail-label">Platform</span>
-  <span class="ctf-detail-value">TryHackMe</span>
-</div>
+![Corp Website TryHackMe room context](assets/01_room.png)
 
-<div class="ctf-detail">
-  <span class="ctf-detail-label">Room</span>
-  <span class="ctf-detail-value">Corp Website</span>
-</div>
+*Figure 1 — TryHackMe Corp Website room context.*
 
-<div class="ctf-detail">
-  <span class="ctf-detail-label">Theme</span>
-  <span class="ctf-detail-value">Romance &amp; Co</span>
-</div>
-
-<div class="ctf-detail">
-  <span class="ctf-detail-label">Difficulty</span>
-  <span class="ctf-detail-value">Medium</span>
-</div>
-
-<div class="ctf-detail">
-  <span class="ctf-detail-label">Operating System</span>
-  <span class="ctf-detail-value">Linux</span>
-</div>
-
-<div class="ctf-detail">
-  <span class="ctf-detail-label">Web Port</span>
-  <span class="ctf-detail-value"><code>3000/tcp</code></span>
-</div>
-
-<div class="ctf-detail">
-  <span class="ctf-detail-label">Framework</span>
-  <span class="ctf-detail-value">Next.js</span>
-</div>
-
-<div class="ctf-detail">
-  <span class="ctf-detail-label">Final Objective</span>
-  <span class="ctf-detail-value">Root Access</span>
-</div>
-
-</div>
-
-### Room Context
-
-<figure>
-
-<img src="assets/01_room.png" alt="TryHackMe Corp Website room and target application context">
-
-<figcaption>
-Figure 1 — TryHackMe Corp Website room and target application context.
-</figcaption>
-
-</figure>
-
----
-
-# Initial Reconnaissance
-
-## Objective
-
-The first stage was to understand the target's exposed attack surface.
-
-The challenge identified a web application running on port `3000`, so the initial investigation focused on determining:
-
-- What services were accessible.
-- Which ports were exposed.
-- What technologies were associated with those services.
-- What operating-system characteristics could be identified.
-- Whether the web application exposed additional attack-surface information.
-
-The assessment began with network-level reconnaissance before moving into application-specific analysis.
+The assessment then moved from contextual information to direct network reconnaissance.
 
 ---
 
 # Network and Service Enumeration
 
-A comprehensive Nmap scan was performed to identify open ports, services, versions, and operating-system information.
+## Nmap Service Enumeration
 
-## Command
+A comprehensive Nmap scan was performed to identify open ports, services, versions, operating-system information, and additional reconnaissance data.
 
-<div class="command-result">
-
-<div class="command-result-header">Nmap — Service Enumeration</div>
+### Command
 
 ```bash
 nmap -sS -sV -A -v <TARGET_IP> -oN nmap.txt
 ```
 
-</div>
+### What It Does
 
-## Why Nmap?
+The scan combines:
 
-Nmap was used to establish:
+- SYN-based port scanning.
+- Service and version detection.
+- Operating-system and platform detection.
+- Aggressive reconnaissance.
+- Verbose output.
+- Local output storage in `nmap.txt`.
 
-- Available network services
-- Service versions
-- Application technologies
-- Operating-system characteristics
-- Additional reconnaissance information
+### Why Nmap Was Used
 
-The output was also saved to `nmap.txt`, providing a local record of the reconnaissance results.
+The objective was to establish:
 
-## Key Finding
+- Available network services.
+- Service versions.
+- Application technologies.
+- Operating-system characteristics.
+- Additional reconnaissance information.
+
+Saving the output to `nmap.txt` also provided a local record of the reconnaissance results.
+
+### Key Finding
 
 The scan identified the primary web application on:
 
@@ -394,23 +361,25 @@ The scan identified the primary web application on:
 
 The service fingerprint also provided an important technology clue associated with the application's JavaScript framework.
 
-## Evidence
+### Evidence
 
-<figure>
+![Nmap scan results](assets/02_nmap.png)
 
-<img src="assets/02_nmap.png" alt="Nmap scan results identifying the web service exposed on TCP port 3000">
+*Figure 2 — Nmap reconnaissance identifying the web service exposed on TCP port 3000.*
 
-<figcaption>
-Figure 2 — Nmap reconnaissance identifying the web service exposed on TCP port 3000.
-</figcaption>
+<div class="key-finding">
 
-</figure>
+<div class="key-finding-title">Reconnaissance Finding</div>
+
+The exposed web service on `3000/tcp` became the primary application attack surface for the remainder of the assessment.
+
+</div>
 
 ---
 
 # Directory and Subdomain Enumeration
 
-With the HTTP service identified, the next step was to determine whether additional web content or hosts were available.
+With the HTTP service identified, the next step was to determine whether additional web content, routes, virtual hosts, or subdomains were available.
 
 ## Tools Used
 
@@ -426,38 +395,32 @@ With the HTTP service identified, the next step was to determine whether additio
 
 The enumeration phase focused on discovering:
 
-- Hidden directories
-- Administrative routes
-- Backup files
-- API paths
-- Additional virtual hosts
-- Subdomains
+- Hidden directories.
+- Administrative routes.
+- Backup files.
+- API paths.
+- Additional virtual hosts.
+- Subdomains.
 
-## Evidence
+### Evidence
 
-<figure>
+![Directory and subdomain enumeration](assets/03_enum.png)
 
-<img src="assets/03_enum.png" alt="Directory and subdomain enumeration results">
-
-<figcaption>
-Figure 3 — Directory and subdomain enumeration using multiple reconnaissance tools.
-</figcaption>
-
-</figure>
+*Figure 3 — Directory and subdomain enumeration using multiple reconnaissance tools.*
 
 ## Result
 
 No additional useful directories or subdomains were identified.
 
-This result was important because it indicated that continuing with blind content discovery was unlikely to reveal the primary attack vector.
+This result was significant because it indicated that continuing with blind content discovery was unlikely to reveal the primary attack vector.
 
-The assessment therefore shifted toward **application and framework analysis**.
+The assessment therefore pivoted toward **application and framework analysis**.
 
 <div class="key-finding">
 
-<div class="key-finding-title">Key Finding</div>
+<div class="key-finding-title">Enumeration Finding</div>
 
-Generic directory and subdomain enumeration did not expose a useful additional attack surface. The assessment consequently pivoted toward identifying and researching the underlying application framework.
+Generic directory and subdomain enumeration did not expose a useful additional attack surface. The methodology therefore shifted toward identifying and researching the underlying application framework.
 
 </div>
 
@@ -469,25 +432,19 @@ Generic directory and subdomain enumeration did not expose a useful additional a
 
 Inspection of the web application revealed that it was built using **Next.js**.
 
-This represented a significant change in the assessment strategy.
+This represented an important change in the assessment strategy.
 
-Instead of continuing exclusively with generic fuzzing, the identified framework could be researched for framework-specific vulnerabilities and behaviors.
+Rather than continuing exclusively with generic fuzzing, identifying the underlying framework provided a more focused direction for security research and manual testing.
 
-## Evidence
+### Evidence
 
-<figure>
+![Next.js technology fingerprint](assets/04_nextjs.png)
 
-<img src="assets/04_nextjs.png" alt="Evidence of the application's Next.js technology stack">
-
-<figcaption>
-Figure 4 — Evidence of the application's Next.js technology stack.
-</figcaption>
-
-</figure>
+*Figure 4 — Evidence of the application's Next.js technology stack.*
 
 ## Why Technology Fingerprinting Matters
 
-Technology fingerprinting is an important part of professional web application security testing because identifying the underlying framework can:
+Technology fingerprinting can:
 
 - Narrow the vulnerability research space.
 - Reveal framework-specific attack surfaces.
@@ -519,43 +476,33 @@ This adaptive decision ultimately led toward the successful attack path.
 
 After identifying Next.js, Nuclei was used to compare the exposed application against known vulnerability templates.
 
-<div class="command-result">
-
-<div class="command-result-header">Nuclei — Vulnerability Discovery</div>
+### Command
 
 ```bash
 nuclei -u http://<TARGET_IP>:3000
 ```
 
-</div>
-
-## Objective
+### Objective
 
 The objective was to identify known vulnerabilities relevant to the detected application and technology stack.
 
 Automated scanning was treated as a **vulnerability-discovery aid**, rather than as proof that a finding was exploitable.
 
-## Evidence
+### Evidence
 
-<figure>
+![Nuclei vulnerability scan](assets/05_nuclei.png)
 
-<img src="assets/05_nuclei.png" alt="Nuclei vulnerability scan identifying a potential framework-related remote code execution issue">
-
-<figcaption>
-Figure 5 — Nuclei identifying a potential framework-related remote code execution issue.
-</figcaption>
-
-</figure>
+*Figure 5 — Nuclei identifying a potential framework-related remote code execution issue.*
 
 ## Finding
 
 The scan identified a potential **remote code execution** issue associated with the Next.js application.
 
-The result was treated as a lead that required manual validation.
+The result was treated as a lead requiring manual validation.
 
 <div class="key-finding">
 
-<div class="key-finding-title">Key Finding</div>
+<div class="key-finding-title">Vulnerability Discovery Finding</div>
 
 Nuclei provided a framework-related RCE lead. The finding was not treated as confirmed until the application behavior was manually validated through HTTP request analysis.
 
@@ -563,7 +510,7 @@ Nuclei provided a framework-related RCE lead. The finding was not treated as con
 
 ---
 
-# Vulnerability Research and Validation
+# Vulnerability Validation
 
 ## Manual Verification with Burp Suite
 
@@ -587,31 +534,31 @@ Observe Server Response
 Confirm Command Execution
 ```
 
-## Evidence
+### Evidence
 
-<figure>
+![Burp Suite RCE validation](assets/06_burp_rce.png)
 
-<img src="assets/06_burp_rce.png" alt="Burp Suite request manipulation used to validate remote command execution">
+*Figure 6 — Burp Suite request manipulation used to validate remote command execution.*
 
-<figcaption>
-Figure 6 — Burp Suite request manipulation used to validate remote command execution.
-</figcaption>
-
-</figure>
-
-## Result
+## Validation Result
 
 Manual validation confirmed that attacker-controlled input could result in command execution on the target application.
 
 This established the initial compromise path.
 
-<div class="callout warning">
+<div class="key-finding">
 
-<div class="callout-title">Payload Note</div>
+<div class="key-finding-title">Validation Finding</div>
 
-Exact exploit payloads are intentionally omitted from this portfolio page. The documented methodology preserves the vulnerability discovery and validation process while keeping the write-up focused on assessment reasoning and responsible presentation.
+The suspected RCE condition was manually validated. The assessment therefore progressed from vulnerability discovery into controlled exploitation and host-level access.
 
 </div>
+
+## Payload Handling
+
+Exact exploit payloads are intentionally omitted from this portfolio page.
+
+The documented methodology preserves the vulnerability discovery and validation process while keeping the write-up focused on assessment reasoning and responsible presentation.
 
 ---
 
@@ -627,13 +574,31 @@ The next objective was to establish a more usable interactive shell.
 
 <div class="attack-chain">
 
-<div class="attack-step">Next.js Application</div>
+<div class="attack-step">
+<strong>01</strong>
+<span>Next.js Application</span>
+</div>
+
 <div class="attack-arrow">→</div>
-<div class="attack-step">Validated RCE</div>
+
+<div class="attack-step">
+<strong>02</strong>
+<span>Validated RCE</span>
+</div>
+
 <div class="attack-arrow">→</div>
-<div class="attack-step">Command Execution</div>
+
+<div class="attack-step">
+<strong>03</strong>
+<span>Command Execution</span>
+</div>
+
 <div class="attack-arrow">→</div>
-<div class="attack-step">Host-Level Access</div>
+
+<div class="attack-step">
+<strong>04</strong>
+<span>Host-Level Access</span>
+</div>
 
 </div>
 
@@ -649,29 +614,17 @@ A Netcat listener was prepared on the attacking machine.
 
 ### Listener
 
-<div class="command-result">
-
-<div class="command-result-header">Netcat Listener</div>
-
 ```bash
 nc -lnvp 1337
 ```
 
-</div>
-
 The validated command-execution primitive was then used to trigger a connection back to the listener.
 
-## Evidence
+### Evidence
 
-<figure>
+![Reverse shell](assets/07_shell.png)
 
-<img src="assets/07_shell.png" alt="Reverse shell established on the target Linux host">
-
-<figcaption>
-Figure 7 — Reverse shell established on the target Linux host.
-</figcaption>
-
-</figure>
+*Figure 7 — Reverse shell established on the target Linux host.*
 
 ## Shell Verification
 
@@ -679,11 +632,11 @@ Once the shell was received, the execution context was verified.
 
 The post-exploitation phase focused on determining:
 
-- Current user
-- Host identity
-- Working directory
-- Application files
-- Available privileges
+- Current user.
+- Host identity.
+- Working directory.
+- Application files.
+- Available privileges.
 
 This confirmed that the web-layer compromise had successfully transitioned into host-level access.
 
@@ -705,15 +658,11 @@ After gaining an interactive shell, local privilege enumeration was performed.
 
 One of the first high-value checks was:
 
-<div class="command-result">
-
-<div class="command-result-header">Privilege Enumeration</div>
+### Command
 
 ```bash
 sudo -l
 ```
-
-</div>
 
 ### What the Command Does
 
@@ -727,17 +676,11 @@ The command was used to determine whether the compromised account had access to 
 
 A permissive `sudoers` configuration can create a path from a low-privilege account to elevated execution.
 
-## Evidence
+### Evidence
 
-<figure>
+![Sudo privilege enumeration](assets/08_sudo.png)
 
-<img src="assets/08_sudo.png" alt="sudo privilege enumeration revealing passwordless execution of Python 3">
-
-<figcaption>
-Figure 8 — Sudo enumeration revealing passwordless execution of Python 3.
-</figcaption>
-
-</figure>
+*Figure 8 — Sudo enumeration revealing passwordless execution of Python 3.*
 
 ## Finding
 
@@ -771,17 +714,42 @@ Python is a general-purpose scripting interpreter capable of executing operating
 
 <div class="attack-chain">
 
-<div class="attack-step">Low-Privilege User</div>
+<div class="attack-step">
+<strong>01</strong>
+<span>Low-Privilege User</span>
+</div>
+
 <div class="attack-arrow">→</div>
-<div class="attack-step"><code>sudo -l</code></div>
+
+<div class="attack-step">
+<strong>02</strong>
+<span>sudo -l</span>
+</div>
+
 <div class="attack-arrow">→</div>
-<div class="attack-step">NOPASSWD Python 3</div>
+
+<div class="attack-step">
+<strong>03</strong>
+<span>NOPASSWD Python 3</span>
+</div>
+
 <div class="attack-arrow">→</div>
-<div class="attack-step">Privileged Interpreter</div>
+
+<div class="attack-step">
+<strong>04</strong>
+<span>Privileged Interpreter</span>
+</div>
+
 <div class="attack-arrow">→</div>
-<div class="attack-step">Root Shell</div>
+
+<div class="attack-step">
+<strong>05</strong>
+<span>Root Shell</span>
+</div>
 
 </div>
+
+The same escalation path can be represented textually as:
 
 ```text
 Low-Privilege User
@@ -807,17 +775,11 @@ The misconfiguration was successfully leveraged within the authorized TryHackMe 
 
 Once privilege escalation succeeded, the target was operating in the root security context.
 
-## Evidence
+### Evidence
 
-<figure>
+![Root shell](assets/09_root.png)
 
-<img src="assets/09_root.png" alt="Root shell obtained on the target system">
-
-<figcaption>
-Figure 9 — Root access successfully obtained on the target system.
-</figcaption>
-
-</figure>
+*Figure 9 — Root access successfully obtained on the target system.*
 
 ## Final Objective
 
@@ -836,6 +798,14 @@ THM{REDACTED}
 > **The actual flag is intentionally hidden.**
 
 The documented objective was therefore completed with root-level access.
+
+<div class="key-finding">
+
+<div class="key-finding-title">Final Result</div>
+
+The complete attack chain progressed from an exposed web application to validated RCE, an interactive Linux shell, passwordless privileged Python execution, and ultimately root access.
+
+</div>
 
 ---
 
@@ -901,45 +871,43 @@ Root Access
 
 # Key Findings
 
-<div class="key-finding">
-
-<div class="key-finding-title">Finding 01 — Exposed Web Application</div>
+## Finding 01 — Exposed Web Application
 
 The target exposed a web application on TCP port `3000`, making the application the primary initial attack surface.
 
-</div>
+**Security significance:** An externally reachable application represents the first boundary that must be assessed for exposed functionality, technology, configuration, and vulnerabilities.
 
-<div class="key-finding">
+---
 
-<div class="key-finding-title">Finding 02 — Next.js Technology Stack</div>
+## Finding 02 — Next.js Technology Stack
 
 Technology fingerprinting identified Next.js, allowing the assessment to move from generic enumeration toward framework-specific security research.
 
-</div>
+**Security significance:** Accurate technology identification can substantially narrow the security research space and improve assessment efficiency.
 
-<div class="key-finding">
+---
 
-<div class="key-finding-title">Finding 03 — Potential RCE</div>
+## Finding 03 — Potential RCE
 
 Nuclei identified a potential framework-related remote code execution issue, which was subsequently manually validated through Burp Suite.
 
-</div>
+**Security significance:** Automated scanner output should be treated as a lead until the underlying behavior has been independently verified.
 
-<div class="key-finding">
+---
 
-<div class="key-finding-title">Finding 04 — Command Execution to Host Access</div>
+## Finding 04 — Command Execution to Host Access
 
 The validated RCE condition enabled command execution and was used to establish an interactive reverse shell on the Linux target.
 
-</div>
+**Security significance:** Successful application-layer RCE can cross the application-to-operating-system security boundary.
 
-<div class="key-finding">
+---
 
-<div class="key-finding-title">Finding 05 — Excessive Sudo Privilege</div>
+## Finding 05 — Excessive Sudo Privilege
 
 The compromised account could execute `/usr/bin/python3` through `sudo` without a password, creating the documented privilege-escalation path to root.
 
-</div>
+**Security significance:** Unrestricted privileged execution of a general-purpose interpreter can undermine the intended separation between low-privilege and administrative execution.
 
 ---
 
@@ -997,9 +965,13 @@ The documented attack chain also provides several useful defensive detection poi
 
 ```text
 Unexpected Web Server → Shell Process
+
 Unexpected Outbound Reverse Connection
+
 Suspicious POST Requests
+
 Privileged Python Execution
+
 Unusual Sudo Activity
 ```
 
@@ -1015,11 +987,15 @@ Directory and subdomain enumeration did not expose a useful additional attack su
 
 Continuing blindly with the same methodology would have added limited value. Identifying the underlying framework provided a stronger direction for the assessment.
 
+---
+
 ## 2. Framework Fingerprinting Is Valuable
 
 Identifying Next.js significantly narrowed the vulnerability research scope.
 
 Technology identification should therefore be treated as an important part of web application reconnaissance rather than merely an informational step.
+
+---
 
 ## 3. Automated Findings Must Be Validated
 
@@ -1027,11 +1003,15 @@ Nuclei identified a potential issue, but the result was treated as a lead.
 
 Burp Suite was then used to manually inspect and reproduce the suspected behavior. This provided the validation necessary to establish that command execution was possible.
 
+---
+
 ## 4. Initial Access Is Not the End
 
 Obtaining command execution and a reverse shell represented only the beginning of the host-level assessment.
 
 Local privilege enumeration was required to determine whether the compromised account could move to a higher privilege level.
+
+---
 
 ## 5. Sudo Configuration Requires Care
 
@@ -1049,49 +1029,131 @@ All evidence captured during the assessment is maintained under:
 docs/assets/
 ```
 
-| Evidence | File |
-|---|---|
-| Room Context | [`01_room.png`](assets/01_room.png) |
-| Network Reconnaissance | [`02_nmap.png`](assets/02_nmap.png) |
-| Enumeration | [`03_enum.png`](assets/03_enum.png) |
-| Next.js Fingerprinting | [`04_nextjs.png`](assets/04_nextjs.png) |
-| Nuclei Scan | [`05_nuclei.png`](assets/05_nuclei.png) |
-| Burp RCE Validation | [`06_burp_rce.png`](assets/06_burp_rce.png) |
-| Reverse Shell | [`07_shell.png`](assets/07_shell.png) |
-| Sudo Enumeration | [`08_sudo.png`](assets/08_sudo.png) |
-| Root Access | [`09_root.png`](assets/09_root.png) |
+## Room Context
 
-The screenshots are retained using their original filenames and relative paths.
+![Room context](assets/01_room.png)
+
+**Figure 1 — TryHackMe Corp Website room context.**
+
+---
+
+## Network Reconnaissance
+
+![Nmap reconnaissance](assets/02_nmap.png)
+
+**Figure 2 — Nmap reconnaissance identifying the web service exposed on TCP port 3000.**
+
+---
+
+## Directory and Subdomain Enumeration
+
+![Enumeration](assets/03_enum.png)
+
+**Figure 3 — Directory and subdomain enumeration using Gobuster, Amass, and Subfinder.**
+
+---
+
+## Next.js Fingerprinting
+
+![Next.js fingerprinting](assets/04_nextjs.png)
+
+**Figure 4 — Evidence of the application's Next.js technology stack.**
+
+---
+
+## Nuclei Vulnerability Discovery
+
+![Nuclei scan](assets/05_nuclei.png)
+
+**Figure 5 — Nuclei identifying a potential framework-related remote code execution issue.**
+
+---
+
+## Burp Suite RCE Validation
+
+![Burp Suite RCE validation](assets/06_burp_rce.png)
+
+**Figure 6 — Burp Suite request manipulation used to validate remote command execution.**
+
+---
+
+## Reverse Shell
+
+![Reverse shell](assets/07_shell.png)
+
+**Figure 7 — Reverse shell established on the target Linux host.**
+
+---
+
+## Sudo Enumeration
+
+![Sudo enumeration](assets/08_sudo.png)
+
+**Figure 8 — Sudo enumeration revealing passwordless execution of Python 3.**
+
+---
+
+## Root Access
+
+![Root access](assets/09_root.png)
+
+**Figure 9 — Root access successfully obtained on the target system.**
 
 ---
 
 # Tools Used
 
-| Tool | Purpose |
-|---|---|
-| **Nmap** | Network and service enumeration |
-| **Gobuster** | Directory discovery |
-| **Amass** | Subdomain enumeration |
-| **Subfinder** | Passive subdomain enumeration |
-| **Nuclei** | Vulnerability discovery |
-| **Burp Suite** | HTTP interception and manual validation |
-| **Netcat** | Reverse shell listener |
-| **Linux CLI** | Post-exploitation enumeration |
-| **sudo** | Privilege analysis |
-| **Python 3** | Privileged execution analysis |
+<div class="ctf-card-grid">
 
-<div class="tool-list">
+<div class="ctf-card">
+<div class="ctf-card-title">Nmap</div>
+<div class="ctf-card-value">Network &amp; Service Enumeration</div>
+</div>
 
-<span class="tool-tag">Nmap</span>
-<span class="tool-tag">Gobuster</span>
-<span class="tool-tag">Amass</span>
-<span class="tool-tag">Subfinder</span>
-<span class="tool-tag">Nuclei</span>
-<span class="tool-tag">Burp Suite</span>
-<span class="tool-tag">Netcat</span>
-<span class="tool-tag">Linux CLI</span>
-<span class="tool-tag">sudo</span>
-<span class="tool-tag">Python 3</span>
+<div class="ctf-card">
+<div class="ctf-card-title">Gobuster</div>
+<div class="ctf-card-value">Directory Discovery</div>
+</div>
+
+<div class="ctf-card">
+<div class="ctf-card-title">Amass</div>
+<div class="ctf-card-value">Subdomain Enumeration</div>
+</div>
+
+<div class="ctf-card">
+<div class="ctf-card-title">Subfinder</div>
+<div class="ctf-card-value">Passive Subdomain Enumeration</div>
+</div>
+
+<div class="ctf-card">
+<div class="ctf-card-title">Nuclei</div>
+<div class="ctf-card-value">Vulnerability Discovery</div>
+</div>
+
+<div class="ctf-card">
+<div class="ctf-card-title">Burp Suite</div>
+<div class="ctf-card-value">HTTP Analysis &amp; Validation</div>
+</div>
+
+<div class="ctf-card">
+<div class="ctf-card-title">Netcat</div>
+<div class="ctf-card-value">Reverse Shell Listener</div>
+</div>
+
+<div class="ctf-card">
+<div class="ctf-card-title">Linux CLI</div>
+<div class="ctf-card-value">Post-Exploitation Enumeration</div>
+</div>
+
+<div class="ctf-card">
+<div class="ctf-card-title">sudo</div>
+<div class="ctf-card-value">Privilege Analysis</div>
+</div>
+
+<div class="ctf-card">
+<div class="ctf-card-title">Python 3</div>
+<div class="ctf-card-value">Privileged Execution Analysis</div>
+</div>
 
 </div>
 
@@ -1139,27 +1201,70 @@ This CTF demonstrates practical exposure to a complete offensive-security workfl
 
 <div class="attack-chain">
 
-<div class="attack-step">Reconnaissance</div>
-<div class="attack-arrow">+</div>
-<div class="attack-step">Enumeration</div>
-<div class="attack-arrow">+</div>
-<div class="attack-step">Technology Analysis</div>
-<div class="attack-arrow">+</div>
-<div class="attack-step">Vulnerability Research</div>
-<div class="attack-arrow">+</div>
-<div class="attack-step">Manual Validation</div>
-<div class="attack-arrow">+</div>
-<div class="attack-step">Initial Access</div>
-<div class="attack-arrow">+</div>
-<div class="attack-step">Post-Exploitation</div>
-<div class="attack-arrow">+</div>
-<div class="attack-step">Privilege Escalation</div>
-<div class="attack-arrow">+</div>
-<div class="attack-step">Security Reporting</div>
+<div class="attack-step">
+<strong>01</strong>
+<span>Reconnaissance</span>
+</div>
+
+<div class="attack-arrow">→</div>
+
+<div class="attack-step">
+<strong>02</strong>
+<span>Enumeration</span>
+</div>
+
+<div class="attack-arrow">→</div>
+
+<div class="attack-step">
+<strong>03</strong>
+<span>Technology Analysis</span>
+</div>
+
+<div class="attack-arrow">→</div>
+
+<div class="attack-step">
+<strong>04</strong>
+<span>Vulnerability Research</span>
+</div>
+
+<div class="attack-arrow">→</div>
+
+<div class="attack-step">
+<strong>05</strong>
+<span>Manual Validation</span>
+</div>
+
+<div class="attack-arrow">→</div>
+
+<div class="attack-step">
+<strong>06</strong>
+<span>Initial Access</span>
+</div>
+
+<div class="attack-arrow">→</div>
+
+<div class="attack-step">
+<strong>07</strong>
+<span>Post-Exploitation</span>
+</div>
+
+<div class="attack-arrow">→</div>
+
+<div class="attack-step">
+<strong>08</strong>
+<span>Privilege Escalation</span>
+</div>
+
+<div class="attack-arrow">→</div>
+
+<div class="attack-step">
+<strong>09</strong>
+<span>Security Reporting</span>
+</div>
 
 </div>
 
-The assessment therefore demonstrates practical exposure to:
+The assessment demonstrates practical exposure to:
 
 <div class="tool-list">
 
@@ -1173,7 +1278,7 @@ The assessment therefore demonstrates practical exposure to:
 
 </div>
 
-The strongest portfolio value comes from the demonstrated ability to **adapt the assessment methodology based on reconnaissance results**, validate automated findings manually, transition from application-layer compromise to host-level access, and identify a local privilege boundary weakness.
+The strongest portfolio value comes from the demonstrated ability to **adapt the assessment methodology based on reconnaissance results**, validate automated findings manually, transition from application-layer compromise to host-level access, and identify a local privilege-boundary weakness.
 
 ---
 
@@ -1203,32 +1308,42 @@ The documented attack path was:
 
 ```text
 Port 3000
-   ↓
+    ↓
 Next.js
-   ↓
+    ↓
 Framework Vulnerability
-   ↓
+    ↓
 Remote Code Execution
-   ↓
+    ↓
 Reverse Shell
-   ↓
+    ↓
 sudo -l
-   ↓
+    ↓
 Passwordless Python
-   ↓
+    ↓
 Root
 ```
 
 The central lesson from the engagement was the importance of **adaptive enumeration**.
 
-When conventional directory and subdomain enumeration produced limited results, framework identification provided a more focused direction. Nuclei then surfaced a potential RCE condition, while Burp Suite was used to manually validate the behavior. After obtaining host-level access, `sudo -l` revealed a passwordless privileged Python configuration that enabled the final escalation to root.
+When conventional directory and subdomain enumeration produced limited results, framework identification provided a more focused direction. Nuclei then surfaced a potential RCE condition, while Burp Suite was used to manually validate the behavior.
 
-<div class="callout">
+After obtaining host-level access, `sudo -l` revealed a passwordless privileged Python configuration that enabled the final escalation to root.
 
-<div class="callout-title">Assessment Takeaway</div>
+<div class="key-finding">
 
-<strong>Identify the technology. Validate the weakness. Enumerate the host. Understand the privilege boundary. Document the evidence.</strong>
+<div class="key-finding-title">Assessment Takeaway</div>
+
+**Identify the technology. Validate the weakness. Enumerate the host. Understand the privilege boundary. Document the evidence.**
 
 </div>
 
 ---
+
+<div class="ctf-footer">
+
+**RECON → ENUMERATE → VALIDATE → EXPLOIT → ESCALATE → DOCUMENT**
+
+**TryHackMe • Corp Website • Portfolio Documentation**
+
+</div>
