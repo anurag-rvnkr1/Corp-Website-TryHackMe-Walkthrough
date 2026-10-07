@@ -34,25 +34,22 @@ A structured penetration-testing assessment of a Linux-hosted web application, p
 </div>
 
 ---
-
 ## Navigation
 
-<div class="ctf-toc">
-
-<div class="ctf-toc-title">Documentation Map</div>
+**Documentation Map**
 
 - [Mission](#mission)
-- [Challenge Profile](#challenge-profile)
-- [Assessment Workflow](#assessment-workflow)
+- [Quick Overview](#quick-overview)
 - [Skills Demonstrated](#skills-demonstrated)
-- [Attack Surface](#attack-surface)
-- [Reconnaissance](#reconnaissance)
+- [Attack Chain](#attack-chain)
+- [Lab Context](#lab-context)
+- [Initial Reconnaissance](#initial-reconnaissance)
 - [Network and Service Enumeration](#network-and-service-enumeration)
 - [Directory and Subdomain Enumeration](#directory-and-subdomain-enumeration)
 - [Technology Fingerprinting](#technology-fingerprinting)
 - [Vulnerability Discovery](#vulnerability-discovery)
-- [Vulnerability Validation](#vulnerability-validation)
-- [Exploitation and Initial Access](#exploitation-and-initial-access)
+- [Vulnerability Research and Validation](#vulnerability-research-and-validation)
+- [Initial Access](#initial-access)
 - [Reverse Shell](#reverse-shell)
 - [Local Privilege Enumeration](#local-privilege-enumeration)
 - [Privilege Escalation](#privilege-escalation)
@@ -69,10 +66,6 @@ A structured penetration-testing assessment of a Linux-hosted web application, p
 - [Portfolio Value](#portfolio-value)
 - [References](#references)
 - [Responsible Use](#responsible-use)
-- [Final Summary](#final-summary)
-
-</div>
-
 ---
 
 # Mission
@@ -1340,10 +1333,3 @@ After obtaining host-level access, `sudo -l` revealed a passwordless privileged 
 
 ---
 
-<div class="ctf-footer">
-
-**RECON → ENUMERATE → VALIDATE → EXPLOIT → ESCALATE → DOCUMENT**
-
-**TryHackMe • Corp Website • Portfolio Documentation**
-
-</div>
