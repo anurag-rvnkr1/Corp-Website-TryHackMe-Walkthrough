@@ -1,6 +1,6 @@
 # Corp Website — TryHackMe CTF Walkthrough
+---
 <div class="ctf-hero">
-
 <p>
 A structured penetration-testing assessment of a Linux-hosted web application, progressing from network reconnaissance and framework identification through validated remote code execution, reverse-shell access, and passwordless sudo-based privilege escalation.
 </p>
