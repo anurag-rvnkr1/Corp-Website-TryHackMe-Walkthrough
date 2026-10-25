@@ -1,17 +1,3 @@
----
-layout: default
-title: "Corp Website — TryHackMe CTF Walkthrough"
-description: "Professional documentation of the Corp Website TryHackMe CTF covering reconnaissance, Next.js security research, remote code execution, reverse shell access, and Linux privilege escalation."
-category: "TryHackMe // Web Security"
-tags:
-  - TryHackMe
-  - Web Security
-  - Next.js
-  - RCE
-  - Linux
-  - Privilege Escalation
----
-
 <div class="ctf-hero">
 
 # Corp Website — TryHackMe CTF Walkthrough
